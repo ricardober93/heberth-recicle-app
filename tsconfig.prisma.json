@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "resolveJsonModule": true,
+    "isolatedModules": false,
+    "outDir": "./dist/prisma", 
+    "rootDir": "./prisma", 
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": false
+  },
+  "include": [
+    "prisma/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "src",
+    "public",
+    "dist",
+    "next-env.d.ts",
+    "**/*.tsx",
+    ".next"
+  ]
+}

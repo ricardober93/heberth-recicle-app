@@ -1,103 +1,206 @@
-import Image from "next/image";
+// src/app/page.tsx
+'use client';
 
-export default function Home() {
+import React, { useState, useEffect, FormEvent } from 'react';
+
+// Define interfaces based on Prisma schema
+interface Classroom {
+  id: string;
+  name: string;
+}
+
+interface Student {
+  id: string;
+  name: string;
+  classroomId: string;
+  recyclingRecords: RecyclingRecord[]; // Include records for display
+}
+
+interface RecyclingRecord {
+  id: string;
+  kilos: number;
+  date: string; // Or Date object if preferred
+  studentId: string;
+}
+
+export default function HomePage() {
+  const [classrooms, setClassrooms] = useState<Classroom[]>([]);
+  const [students, setStudents] = useState<Student[]>([]);
+  const [selectedClassroom, setSelectedClassroom] = useState<string>('');
+  const [selectedStudent, setSelectedStudent] = useState<string>('');
+  const [kilos, setKilos] = useState<string>('');
+  const [loadingClassrooms, setLoadingClassrooms] = useState(true);
+  const [loadingStudents, setLoadingStudents] = useState(false);
+
+  // Fetch classrooms on component mount
+  useEffect(() => {
+    fetchClassrooms();
+  }, []);
+
+  // Fetch students when a classroom is selected
+  useEffect(() => {
+    if (selectedClassroom) {
+      fetchStudentsByClassroom(selectedClassroom);
+    } else {
+      setStudents([]); // Clear students if no classroom is selected
+    }
+  }, [selectedClassroom]);
+
+  const fetchClassrooms = async () => {
+    setLoadingClassrooms(true);
+    try {
+      const response = await fetch("/api/classrooms");
+      const data = await response.json();
+      setClassrooms(data);
+    } catch (error) {
+      console.error("Error fetching classrooms:", error);
+    } finally {
+      setLoadingClassrooms(false);
+    }
+  };
+
+  const fetchStudentsByClassroom = async (classroomId: string) => {
+    setLoadingStudents(true);
+    try {
+      // TODO: Implement API endpoint to fetch students by classroom
+      const response = await fetch(`/api/students?classroomId=${classroomId}`);
+      const data = await response.json();
+      console.log(data);
+      
+      setStudents(data);
+      console.log(`Fetching students for classroom ${classroomId}...`); // Placeholder
+    } catch (error) {
+      console.error('Error fetching students:', error);
+      setStudents([]); // Placeholder
+    } finally {
+      setLoadingStudents(false);
+    }
+  };
+
+  const handleAddRecycling = async (e: FormEvent) => {
+    e.preventDefault();
+    const kilosValue = parseFloat(kilos);
+    if (!selectedStudent || isNaN(kilosValue) || kilosValue <= 0) {
+      alert('Por favor, selecciona un estudiante e ingresa una cantidad válida de kilos.');
+      return;
+    }
+
+    try {
+      // TODO: Implement API endpoint to add recycling record
+       const response = await fetch('/api/recycling', {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({ studentId: selectedStudent, kilos: kilosValue }),
+       });
+       if (response.ok) {
+         setKilos('');
+         setSelectedStudent(''); // Optionally reset student selection
+         fetchStudentsByClassroom(selectedClassroom); // Refresh student list
+         alert('Registro agregado!');
+       }
+      console.log(`Adding ${kilosValue}kg for student ${selectedStudent}`); // Placeholder
+      setKilos(''); // Placeholder
+      setSelectedStudent(''); // Placeholder
+      fetchStudentsByClassroom(selectedClassroom); // Placeholder
+      alert('Registro agregado (simulado)!'); // Placeholder
+    } catch (error) {
+      console.error('Error adding recycling record:', error);
+      alert('Error al agregar el registro.');
+    }
+  };
+
+  // Helper function to calculate total kilos per student
+  const getTotalKilos = (student: Student): number => {
+    // TODO: Implement actual calculation when API is ready
+     return student.recyclingRecords.reduce((sum, record) => sum + record.kilos, 0);
+    return 0; // Placeholder
+  };
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Registro de Reciclaje</h1>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+      {/* Selector de Salón */}
+      <section className="mb-6">
+        <label htmlFor="classroom-select" className="block text-lg font-medium mb-2">Selecciona un Salón:</label>
+        <select
+          id="classroom-select"
+          value={selectedClassroom}
+          onChange={(e) => setSelectedClassroom(e.target.value)}
+          className="border p-2 rounded w-full md:w-1/2"
+          disabled={loadingClassrooms}
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          <option value="">{loadingClassrooms ? 'Cargando...' : '-- Selecciona --'}</option>
+          ¨{
+            JSON.stringify(classrooms)
+          }
+          { classrooms && classrooms.map((classroom) => (
+                <option key={classroom.id} value={classroom.id}>
+                  {classroom.name}
+                </option>
+              ))}
+        </select>
+      </section>
+
+      {/* Lista de Estudiantes y Formulario de Reciclaje */}
+      {selectedClassroom && (
+        <section>
+          <h2 className="text-xl font-semibold mb-3">Estudiantes</h2>
+          {loadingStudents ? (
+            <p>Cargando estudiantes...</p>
+          ) : students.length > 0 ? (
+            <div className="grid grid-cols-1 gap-6">
+              {/* Lista de Estudiantes */}
+              <div>
+                <ul className="space-y-2">
+                  {students.map((student) => (
+                    <li key={student.id} className="border p-3 rounded shadow-sm">
+                      <span className="font-medium">{student.name}</span>
+                      {/* TODO: Display total kilos when API is ready */}
+                       <span className="text-gray-600"> - {getTotalKilos(student).toFixed(2)} kg</span> 
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Formulario para Agregar Kilos */}
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Agregar Kilos de Reciclaje</h3>
+                <form onSubmit={handleAddRecycling} className="flex flex-col gap-3 p-4 border rounded shadow-sm bg-gray-50 text-black">
+                  <select
+                    value={selectedStudent}
+                    onChange={(e) => setSelectedStudent(e.target.value)}
+                    className="border p-2 rounded w-full"
+                    required
+                  >
+                    <option value="">-- Selecciona Estudiante --</option>
+                    {students.map((student) => (
+                      <option key={student.id} value={student.id}>
+                        {student.name}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    value={kilos}
+                    onChange={(e) => setKilos(e.target.value)}
+                    placeholder="Kilos"
+                    className="border p-2 rounded w-full"
+                    required
+                  />
+                  <button type="submit" className="bg-green-500 text-white p-2 rounded hover:bg-green-600">
+                    Agregar Registro
+                  </button>
+                </form>
+              </div>
+            </div>
+          ) : (
+            <p>No hay estudiantes en este salón.</p>
+          )}
+        </section>
+      )}
     </div>
   );
 }
