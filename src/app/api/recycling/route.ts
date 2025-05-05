@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import { PrismaClient } from '@/generated/prisma'; // Corrected import
+
+const prisma = new PrismaClient();
 
 // POST /api/recycling - Create a new recycling record
 export async function POST(request: NextRequest) {

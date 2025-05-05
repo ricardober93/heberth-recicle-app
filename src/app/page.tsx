@@ -135,7 +135,7 @@ export default function HomePage() {
             JSON.stringify(classrooms)
           }
           { classrooms && classrooms.map((classroom) => (
-                <option key={classroom.id} value={classroom.id}>
+                <option key={classroom.id} value={classroom.id} className='text-black'>
                   {classroom.name}
                 </option>
               ))}
