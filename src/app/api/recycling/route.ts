@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@/generated/prisma'; // Corrected import
-
-const prisma = new PrismaClient();
+import { classroom as classroomSchema, user as userSchema, recyclingRecord as recyclingRecordSchema} from '@/db/schema';
+import { eq } from 'drizzle-orm';
+import  db  from '@/db/client';
 
 // POST /api/recycling - Create a new recycling record
 export async function POST(request: NextRequest) {
@@ -18,20 +18,24 @@ export async function POST(request: NextRequest) {
     }
 
     // Optional: Check if student exists
-    const studentExists = await prisma.student.findUnique({
-      where: { id: studentId },
-    });
+    const [studentExists] = await db.select()
+      .from(userSchema)
+      .where(eq(userSchema.id, studentId))
+      
+
 
     if (!studentExists) {
       return NextResponse.json({ error: 'Student not found' }, { status: 404 });
     }
 
-    const newRecord = await prisma.recyclingRecord.create({
-      data: {
-        kilos,
+    const kilosFloat = kilos.toString();
+
+    const [newRecord] = await db.insert(recyclingRecordSchema)
+      .values({
+        kilos: kilosFloat,
         studentId,
-      },
-    });
+      })
+      .returning();
     return NextResponse.json(newRecord, { status: 201 });
   } catch (error) {
     console.error('Error creating recycling record:', error);

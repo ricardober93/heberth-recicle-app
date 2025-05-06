@@ -1,11 +1,14 @@
-// src/app/api/auth/login/route.ts
-import { PrismaClient } from '@/generated/prisma';
+
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import db from '@/db/client';
+import { user as userSchema} from '@/db/schema';
+import { eq } from 'drizzle-orm';
 
-const prisma = new PrismaClient();
-const JWT_SECRET = process.env.JWT_SECRET || 'your-very-secure-secret'; // ¡Usa una variable de entorno en producción!
+const JWT_SECRET = process.env.JWT_SECRET || 'your-very-secure-secret';
+
+
 
 export async function POST(request: Request) {
   try {
@@ -15,10 +18,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Username and password are required' }, { status: 400 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { username },
-    });
-
+    const [user] = await db.select().from(userSchema).where(eq(userSchema.username,username));
+    
     if (!user) {
       return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
     }
@@ -29,20 +30,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
     }
 
-    // Generar token JWT
     const token = jwt.sign(
-      { userId: user.id, username: user.username }, // Payload
+      { userId: user.id, username: user.username },
       JWT_SECRET,
-      { expiresIn: '1h' } // Opciones (ej: expira en 1 hora)
+      { expiresIn: '1h' }
     );
 
-    // Devolver el token
     return NextResponse.json({ token });
 
   } catch (error) {
     console.error('Login error:', error);
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
-  } finally {
-    await prisma.$disconnect();
-  }
+  } 
 }

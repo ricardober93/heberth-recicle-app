@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient} from '@/generated/prisma';
+import { classroom as classroomSchema, user as userSchema, recyclingRecord as recyclingRecordSchema, student as studentSchema} from '@/db/schema';
+import { eq } from 'drizzle-orm';
+import  db  from '@/db/client';
 
-const prisma = new PrismaClient();
 // POST /api/students - Create a new student
 import { authMiddleware } from '../../../middleware/auth';
 
@@ -15,20 +16,19 @@ export const POST = authMiddleware(async (request: NextRequest) => {
     }
 
     // Optional: Check if classroom exists
-    const classroomExists = await prisma.classroom.findUnique({
-      where: { id: classroomId },
-    });
+    const [classroomExists] = await db.select().from(classroomSchema).where(eq(classroomSchema.id,classroomId));
 
     if (!classroomExists) {
       return NextResponse.json({ error: 'Classroom not found' }, { status: 404 });
     }
 
-    const newStudent = await prisma.student.create({
-      data: {
-        name,
-        classroomId,
-      },
-    });
+    const newStudent = await db.insert(studentSchema).values({
+     name,
+      classroomId,
+    })
+
+
+
     return NextResponse.json(newStudent, { status: 201 });
   } catch (error) {
     console.error('Error creating student:', error);
@@ -46,14 +46,11 @@ export const GET = authMiddleware(async (request: NextRequest) => {
   }
 
   try {
-    const students = await prisma.student.findMany({
-      where: {
-        classroomId: classroomId,
-      },
-      include: { // Optionally include related data
-        recyclingRecords: true,
-      },
-    });
+    const [students] = (await db.select().from(studentSchema).where(eq(studentSchema.classroomId,classroomId)));
+      
+      
+
+  
     return NextResponse.json(students);
   } catch (error) {
     console.error('Error fetching students:', error);
