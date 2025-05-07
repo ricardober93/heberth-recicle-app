@@ -29,16 +29,13 @@ export default function LoginPage() {
       if (!response.ok) {
         throw new Error(data.message || 'Error al iniciar sesión');
       }
-
-      // Handle successful login
-      console.log('Login successful, token:', data.token);
       // Store the token in a cookie
       Cookies.set('auth_token', data.token, { expires: 1/24, path: '/' }); // Expires in 1 hour
 
       router.push('/admin'); // Redirect to admin page
 
-    } catch (err: any) {
-      setError(err.message || 'Ocurrió un error inesperado.');
+    } catch (err : unknown) {
+      setError(err instanceof Error ? err.message : 'Ocurrió un error inesperado.');
       console.error('Login error:', err);
     } finally {
       setLoading(false);

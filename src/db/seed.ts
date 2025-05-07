@@ -1,12 +1,10 @@
 
-import { eq } from "drizzle-orm";
-import bcrypt from "bcrypt";
-import { user } from "./schema";
-import { config } from "dotenv";
 import { neon } from "@neondatabase/serverless";
+import bcrypt from "bcrypt";
+import { config } from "dotenv";
 import { drizzle } from "drizzle-orm/neon-http";
-import * as schema from "./schema";
 import { seed } from "drizzle-seed";
+import * as schema from "./schema";
 
 config({ path: ".env" }); // or .env
 

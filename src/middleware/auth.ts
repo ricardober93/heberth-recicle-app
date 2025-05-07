@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret_key';
 
-export function authMiddleware(handler: any) {
+export function authMiddleware(handler: (req: NextRequest) => Promise<NextResponse>) {
   return async (req: NextRequest) => {
     const token = req.cookies.get('auth_token')?.value;
 
@@ -16,7 +16,9 @@ export function authMiddleware(handler: any) {
       (req as any).user = decoded;
       return handler(req);
     } catch (err) {
+      console.error(err);
       return new NextResponse('Token inválido', { status: 403 });
+      
     }
   };
 }
