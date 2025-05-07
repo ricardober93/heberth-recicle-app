@@ -1,7 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
 import db from '@/db/client';
-import { classroom as classroomSchema, user as userSchema} from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { classroom as classroomSchema } from '@/db/schema';
+import { NextRequest, NextResponse } from 'next/server';
 
 
 // Add finally block to disconnect prisma client

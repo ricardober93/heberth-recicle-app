@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { classroom as classroomSchema, user as userSchema, recyclingRecord as recyclingRecordSchema, student as studentSchema} from '@/db/schema';
+import db from '@/db/client';
+import { classroom as classroomSchema, student as studentSchema } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import  db  from '@/db/client';
+import { NextRequest, NextResponse } from 'next/server';
 
 // POST /api/students - Create a new student
 import { authMiddleware } from '../../../middleware/auth';

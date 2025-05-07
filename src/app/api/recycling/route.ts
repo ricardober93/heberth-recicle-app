@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { classroom as classroomSchema, user as userSchema, recyclingRecord as recyclingRecordSchema} from '@/db/schema';
+import db from '@/db/client';
+import { recyclingRecord as recyclingRecordSchema, user as userSchema } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import  db  from '@/db/client';
+import { NextRequest, NextResponse } from 'next/server';
 
 // POST /api/recycling - Create a new recycling record
 export async function POST(request: NextRequest) {
@@ -27,12 +27,11 @@ export async function POST(request: NextRequest) {
     if (!studentExists) {
       return NextResponse.json({ error: 'Student not found' }, { status: 404 });
     }
-
-    const kilosFloat = kilos.toString();
+;
 
     const [newRecord] = await db.insert(recyclingRecordSchema)
       .values({
-        kilos: kilosFloat,
+        kilos,
         studentId,
       })
       .returning();
