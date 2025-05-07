@@ -3,8 +3,8 @@ import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret_key';
 
-export function authMiddleware(handler: (req: NextRequest) => Promise<NextResponse>) {
-  return async (req: NextRequest) => {
+export function authMiddleware(handler: (req) => Promise<NextResponse>) {
+  return async (req) => {
     const token = req.cookies.get('auth_token')?.value;
 
     if (!token) {
@@ -13,7 +13,7 @@ export function authMiddleware(handler: (req: NextRequest) => Promise<NextRespon
 
     try {
       const decoded = jwt.verify(token, JWT_SECRET);
-      (req as any).user = decoded;
+      req.user = decoded;
       return handler(req);
     } catch (err) {
       console.error(err);
