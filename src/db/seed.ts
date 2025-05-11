@@ -1,53 +1,30 @@
-
-import { neon } from "@neondatabase/serverless";
+"use server";
 import bcrypt from "bcrypt";
 import { config } from "dotenv";
-import { drizzle } from "drizzle-orm/neon-http";
-import { seed } from "drizzle-seed";
-import * as schema from "./schema";
-
-config({ path: ".env" }); // or .env
+import { neon } from "@neondatabase/serverless";
 
 async function main() {
   console.log("Start seeding ...");
 
-  const sql = neon(process.env.DATABASE_URL!);
-
-  const db = drizzle(sql, { schema });
-
-  const adminUsername = process.env.ADMIN_USERNAME || "admin";
-  const adminPassword = process.env.ADMIN_PASSWORD || "";
+  const adminUsername = process.env.ADMIN_USERNAME! || "admin";
+  const adminPassword = process.env.ADMIN_PASSWORD! || "";
 
   const saltRounds = 12;
   const hashedPassword = await bcrypt.hash(adminPassword, saltRounds);
   console.log(`Hashed password for ${adminUsername}`);
 
-  try {
-    // Seed database with admin user
-    await seed(db, { user: schema.user }).refine( (db) => ({
-      
-        user: {
-          count: 1,
-        columns: {
-          username: db.default({
-            defaultValue: adminUsername,
-          }),
-          password: db.default({
-            defaultValue: hashedPassword,
-          }),
-          createdAt: db.timestamp(),
-          updatedAt: db.timestamp()
-        }
-        }
-      
-    }));
-    console.log(`Admin user ${adminUsername} created or updated successfully`);
-  } catch (error) {
-    console.error("Error seeding admin user:", error);
-    throw error;
+  const sql = neon(process.env.DATABASE_URL!);
+  const users = await sql` SELECT * FROM "Users"`;
+  console.log(users);
+  
+  if (users.length > 0) {
+    console.log("Users already seeded");
+    return;
   }
 
-  console.log("Seeding finished.");
+  await sql`INSERT INTO "Users" (username, password) VALUES (${adminUsername}, ${hashedPassword})`;
+  console.log("Seeding done");
+  
 }
 
 main();

@@ -11,13 +11,13 @@
     "seed": "npx ts-node --compiler-options {\"module\":\"CommonJS\"} src/db/seed.ts"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^1.0.0",
     "@types/bcrypt": "^5.0.2",
     "@types/js-cookie": "^3.0.6",
     "@types/jsonwebtoken": "^9.0.9",
+    "@neondatabase/serverless": "0.9.4",
     "bcrypt": "^5.1.1",
     "dotenv": "^16.5.0",
-    "drizzle-orm": "^0.36.4",
+    "drizzle-orm": "0.36.4",
     "jose": "^6.0.11",
     "js-cookie": "^3.0.5",
     "jsonwebtoken": "^9.0.2",

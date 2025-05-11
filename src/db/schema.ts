@@ -15,7 +15,7 @@ export const student = pgTable('Student', {
 });
 
 // Definición de la tabla User
-export const user = pgTable('User', {
+export const user = pgTable('users', {
   id: uuid().primaryKey().defaultRandom(),
   username: varchar('username').unique().notNull(),
   password: varchar('password').notNull(), // ¡Importante! NUNCA almacenes contraseñas sin hashear

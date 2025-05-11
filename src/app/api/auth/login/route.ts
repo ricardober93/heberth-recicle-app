@@ -14,18 +14,23 @@ export async function POST(request: Request) {
   try {
     const { username, password } = await request.json();
 
+    console.log(username, password);
+    
     if (!username || !password) {
       return NextResponse.json({ message: 'Username and password are required' }, { status: 400 });
     }
 
-    const [user] = await db.select().from(userSchema).where(eq(userSchema.username,username));
+    const [user] = await db.select().from(userSchema).where(eq(userSchema.username, username));
+    
+    console.log(user);
+    
     
     if (!user) {
       return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
     }
 
     const passwordMatch = await bcrypt.compare(password, user.password);
-
+    console.log(passwordMatch);
     if (!passwordMatch) {
       return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
     }
@@ -33,7 +38,7 @@ export async function POST(request: Request) {
     const token = jwt.sign(
       { userId: user.id, username: user.username },
       JWT_SECRET,
-      { expiresIn: '1h' }
+      { expiresIn: '4h' }
     );
 
     return NextResponse.json({ token });
