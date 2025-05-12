@@ -3,6 +3,8 @@ import bcrypt from "bcrypt";
 import { config } from "dotenv";
 import { neon } from "@neondatabase/serverless";
 
+config();
+
 async function main() {
   console.log("Start seeding ...");
 
