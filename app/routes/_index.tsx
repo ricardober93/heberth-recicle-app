@@ -1,4 +1,4 @@
-import type { MetaFunction } from "@remix-run/node";
+import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { db } from "~/db";
 import { students, recycling, classrooms } from "~/db/schema";
@@ -11,7 +11,10 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export async function loader() {
+import { requireUserId } from "~/session.server";
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  await requireUserId(request);
   const topStudents = await db.select({
     studentId: recycling.studentId,
     studentName: students.name,

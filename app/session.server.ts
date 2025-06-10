@@ -1,4 +1,8 @@
 import { createCookieSessionStorage, redirect } from "@remix-run/node";
+import { db } from "~/db";
+import { users } from "~/db/schema";
+import { eq } from "drizzle-orm";
+
 
 const SESSION_SECRET = process.env.SESSION_SECRET || "s3cr3t";
 
@@ -18,9 +22,6 @@ export async function getSession(request: Request) {
   return sessionStorage.getSession(cookie);
 }
 
-import { db } from "~/db";
-import { users } from "~/db/schema";
-import { eq } from "drizzle-orm";
 
 export async function getUserId(request: Request) {
   const session = await getSession(request);
@@ -31,9 +32,7 @@ export async function getUserId(request: Request) {
 
 export async function getUser(request: Request) {
   const userId = await getUserId(request);
-  if (typeof userId !== "string") {
-    return null;
-  }
+
 
   try {
     const user = await db.select().from(users).where(eq(users.id, Number( userId ))).limit(1);

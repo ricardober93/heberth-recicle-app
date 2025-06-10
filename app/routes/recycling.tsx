@@ -52,9 +52,10 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const user = await getUser(request);
-
-
+  const user = await getUser(request);  
+  if (!user) {
+    return redirect("/login");
+  }
   const studentsList = await db.select({
     id: students.id,
     name: students.name,
@@ -94,6 +95,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export default function Recycling() {
   const { user, studentsList, allClassrooms, allRecyclingRecords } = useLoaderData<typeof loader>();
+
   const actionData = useActionData<typeof action>();
 
   return (

@@ -7,6 +7,7 @@ import { students, classrooms } from "~/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
+
 export const meta: MetaFunction = () => {
   return [{
     title: "Students",
@@ -63,8 +64,13 @@ export async function action({ request }: ActionFunctionArgs) {
   return ({ errors: { _global: ["Invalid intent"] } });
 }
 
+
+
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await getUser(request);
+  if (!user) {
+    return redirect("/login");
+  }
   const allClassrooms = await db.select().from(classrooms);
   const allStudents = await db.select({
     id: students.id,
