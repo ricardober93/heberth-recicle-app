@@ -27,7 +27,7 @@ export async function action({ request }: ActionFunctionArgs) {
   const intent = formData.get("intent");
 
   if (intent === "recordRecycling") {
-    const submission = RecordRecyclingSchema.safeParse(Object.fromEntries(formData));
+      const submission = RecordRecyclingSchema.safeParse(Object.fromEntries(formData));
 
     if (!submission.success) {
       return { errors: submission.error.flatten().fieldErrors };
@@ -53,31 +53,16 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await getUser(request);
-  const url = new URL(request.url);
-  const query = url.searchParams.get("query");
 
-  let studentsList = [];
-  if (query) {
-    studentsList = await db.select({
-      id: students.id,
-      name: students.name,
-      email: students.email,
-      classroom: {
-        name: classrooms.name,
-      },
-    }).from(students).where(
-      like(students.name, `%${query}%`)
-    ).leftJoin(classrooms, eq(students.classroomId, classrooms.id));
-  } else {
-    studentsList = await db.select({
-      id: students.id,
-      name: students.name,
-      email: students.email,
-      classroom: {
-        name: classrooms.name,
-      },
-    }).from(students).leftJoin(classrooms, eq(students.classroomId, classrooms.id));
-  }
+
+  const studentsList = await db.select({
+    id: students.id,
+    name: students.name,
+    email: students.email,
+    classroom: {
+      name: classrooms.name,
+    },
+  }).from(students).leftJoin(classrooms, eq(students.classroomId, classrooms.id));
 
   const allClassrooms = await db.select().from(classrooms);
   const allRecyclingRecords = await db.select({
@@ -104,61 +89,26 @@ export async function loader({ request }: LoaderFunctionArgs) {
   )
   .orderBy(recycling.recycledAt);
 
-  return { user, studentsList, allClassrooms, allRecyclingRecords, query };
+  return { user, studentsList, allClassrooms, allRecyclingRecords };
 }
 
 export default function Recycling() {
-  const { user, studentsList, allClassrooms, allRecyclingRecords, query } = useLoaderData<typeof loader>();
+  const { user, studentsList, allClassrooms, allRecyclingRecords } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">Recycling Page</h1>
+    <div className="min-h-scree p-6">
+      <h1 className="text-3xl font-bold text-gray-300 mb-6">Recycling Page</h1>
       {user && (
-        <p className="text-gray-600 mb-4">Welcome, {user.email}!</p>
+        <p className="text-gray-300 mb-4">Welcome, {user.email}!</p>
       )}
 
-      <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-        <h2 className="text-2xl font-semibold text-gray-700 mb-4">Search Students</h2>
-        <Form method="get" className="flex space-x-4 mb-6">
-          <input
-            type="text"
-            name="query"
-            placeholder="Search by name or email..."
-            defaultValue={query || ""}
-            className="flex-grow px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-          />
-          <button
-            type="submit"
-            className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            Search
-          </button>
-        </Form>
-
-        <h3 className="text-xl font-semibold text-gray-700 mb-3">Students List</h3>
-        {studentsList.length === 0 ? (
-          <p className="text-gray-600">No students found.</p>
-        ) : (
-          <ul className="divide-y divide-gray-200">
-            {studentsList.map((student) => (
-              <li key={student.id} className="py-3 flex items-center justify-between">
-                <div>
-                  <p className="text-lg font-medium text-gray-900">{student.name} ({student.email})</p>
-                  <p className="text-sm text-gray-500">Classroom: {student.classroom?.name}</p>
-                </div>
-                {/* Add button to select student for recycling */}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-        <h2 className="text-2xl font-semibold text-gray-700 mb-4">Record Recycling</h2>
+      <div className="p-6 rounded-lg shadow-md mb-8">
+        <h2 className="text-2xl font-semibold text-gray-100 mb-4">Record Recycling</h2>
         <Form method="post" className="space-y-4">
+          <input type="hidden" name="intent" value="recordRecycling" />
           <div>
-            <label htmlFor="studentId" className="block text-sm font-medium text-gray-700">Student</label>
+            <label htmlFor="studentId" className="block text-sm font-medium text-gray-300">Select Student</label>
             <select
               id="studentId"
               name="studentId"
@@ -167,7 +117,7 @@ export default function Recycling() {
               <option value="">Select a student</option>
               {studentsList.map((student) => (
                 <option key={student.id} value={student.id}>
-                  {student.name} ({student.email})
+                  {student.name} ({student.email}) - {student.classroom?.name}
                 </option>
               ))}
             </select>
@@ -175,8 +125,11 @@ export default function Recycling() {
               <p className="text-red-500 text-xs mt-1">{actionData.errors.studentId[0]}</p>
             )}
           </div>
+
+
+
           <div>
-            <label htmlFor="classroomId" className="block text-sm font-medium text-gray-700">Classroom</label>
+            <label htmlFor="classroomId" className="block text-sm font-medium text-gray-300">Classroom</label>
             <select
               id="classroomId"
               name="classroomId"
@@ -194,7 +147,7 @@ export default function Recycling() {
             )}
           </div>
           <div>
-            <label htmlFor="item" className="block text-sm font-medium text-gray-700">Item</label>
+            <label htmlFor="item" className="block text-sm font-medium text-gray-300">Item</label>
             <input
               type="text"
               id="item"
@@ -206,7 +159,7 @@ export default function Recycling() {
             )}
           </div>
           <div>
-            <label htmlFor="weight" className="block text-sm font-medium text-gray-700">Weight (grams)</label>
+            <label htmlFor="weight" className="block text-sm font-medium text-gray-300">Weight (grams)</label>
             <input
               type="number"
               id="weight"
@@ -231,15 +184,15 @@ export default function Recycling() {
         </Form>
       </div>
 
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-2xl font-semibold text-gray-700 mb-4">Recycling History</h2>
+      <div className="p-6 rounded-lg shadow-md">
+        <h2 className="text-2xl font-semibold text-gray-400 mb-4">Recycling History</h2>
         {allRecyclingRecords.length === 0 ? (
           <p className="text-gray-600">No recycling records found.</p>
         ) : (
           <ul className="divide-y divide-gray-200">
             {allRecyclingRecords.map((record) => (
               <li key={record.id} className="py-3">
-                <p className="text-lg font-medium text-gray-900">{record.student?.name} ({record.student?.email}) - {record.item} ({record.weight}g)</p>
+                <p className="text-lg font-medium text-gray-200">{record.student?.name} ({record.student?.email}) - {record.item} ({record.weight}g)</p>
                 <p className="text-sm text-gray-500">Classroom: {record.classroom?.name} - Recycled At: {new Date(record?.recycledAt).toLocaleString()}</p>
               </li>
             ))}
