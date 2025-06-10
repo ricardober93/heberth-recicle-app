@@ -2,7 +2,7 @@ import type { MetaFunction } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { db } from "~/db";
 import { students, recycling, classrooms } from "~/db/schema";
-import { eq, sum, desc } from "drizzle-orm";
+import { eq, sum, desc, sql } from "drizzle-orm";
 
 export const meta: MetaFunction = () => {
   return [
