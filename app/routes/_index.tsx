@@ -17,7 +17,11 @@ export const meta: MetaFunction = () => {
 export async function loader() {
   const topStudents =
     (await db
-      .select()
+      .select({
+        studentId: recycling.studentId,
+        studentName: students.name,
+        totalWeight: sum(recycling.weight),
+      })
       .from(recycling)
       .leftJoin(students, eq(recycling.studentId, students.id))
       .groupBy(recycling.studentId, students.name)
@@ -104,15 +108,15 @@ export default function Index() {
           <ul className="divide-y divide-gray-200">
             {topStudents.map((student, index) => (
               <li
-                key={student.students?.id}
+                key={student.studentId}
                 className="py-3 flex items-center justify-between bg-gray-600  rounded-lg shadow-md p-4"
               >
                 <div>
                   <p className="text-lg font-medium text-gray-300">
-                    {index + 1}. {student.students?.name}
+                    {index + 1}. {student.studentName}
                   </p>
                   <p className="text-sm text-gray-100">
-                    Total Recycled: {student.recycling.weight}g
+                    Total Recycled: {student.totalWeight}g
                   </p>
                 </div>
               </li>
