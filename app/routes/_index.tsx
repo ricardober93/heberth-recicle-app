@@ -1,10 +1,8 @@
-import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
-import { json } from "@remix-run/node";
+import type { MetaFunction } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { db } from "~/db";
-import { students, recycling } from "~/db/schema";
-import { eq, sum, desc, sql } from "drizzle-orm";
-import { classrooms } from "~/db/schema";
+import { students, recycling, classrooms } from "~/db/schema";
+import { eq, sum, desc, } from "drizzle-orm";
 
 export const meta: MetaFunction = () => {
   return [
@@ -13,7 +11,7 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export async function loader({ request }: LoaderFunctionArgs) {
+export async function loader() {
   const topStudents = await db.select({
     studentId: recycling.studentId,
     studentName: students.name,
@@ -37,7 +35,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   .groupBy(classrooms.name)
   .orderBy(desc(sum(recycling.weight)));
 
-  return json({ topStudents, totalRecycledWeight: totalRecycledWeight[0].total, recyclingByClassroom });
+  return ({ topStudents, totalRecycledWeight: totalRecycledWeight[0].total, recyclingByClassroom });
 }
 
 export default function Index() {
