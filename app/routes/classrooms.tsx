@@ -9,9 +9,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   const user = await getUser(request);
 
-  if (!user) {
-    return redirect("/login");
-  }
   const allClassrooms = await db.select().from(classrooms);
   return { user, allClassrooms };
 }

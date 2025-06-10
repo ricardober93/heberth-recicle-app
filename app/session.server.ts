@@ -32,6 +32,9 @@ export async function getUserId(request: Request) {
 
 export async function getUser(request: Request) {
   const userId = await getUserId(request);
+  if (typeof userId !== "string") {
+    return null;
+  }
 
 
   try {
