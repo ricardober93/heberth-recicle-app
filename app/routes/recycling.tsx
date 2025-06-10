@@ -5,7 +5,7 @@ import { getUser, requireUserId } from "~/session.server";
 import { db } from "~/db";
 import { students, recycling, classrooms } from "~/db/schema";
 import { z } from "zod";
-import { eq, like } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 export const meta: MetaFunction = () => {
   return [{
