@@ -6,6 +6,7 @@ import { db } from "~/db";
 import { students, recycling, classrooms } from "~/db/schema";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
+import RecyclingForm from "../components/RecyclingForm";
 
 export const meta: MetaFunction = () => {
   return [{
@@ -21,7 +22,21 @@ const RecordRecyclingSchema = z.object({
   weight: z.string().regex(/^\d+$/, "Weight must be a number").transform(Number).refine(val => val > 0, "Weight must be positive"),
 });
 
-export async function action({ request }: ActionFunctionArgs) {
+
+
+
+
+interface ActionErrors {
+  errors: {
+    studentId?: string[];
+    classroomId?: string[];
+    item?: string[];
+    weight?: string[];
+    _global?: string[];
+  };
+}
+
+export async function action({ request }: ActionFunctionArgs): Promise<ActionErrors | Response> {
   await requireUserId(request);
   const formData = await request.formData();
   const intent = formData.get("intent");
@@ -93,7 +108,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
 export default function Recycling() {
   const { user, studentsList, allClassrooms, allRecyclingRecords } = useLoaderData<typeof loader>();
 
-  const actionData = useActionData<typeof action>();
+  const actionData = useActionData<ActionErrors>();
+
 
   return (
     <div className="min-h-scree p-6">
@@ -104,83 +120,7 @@ export default function Recycling() {
 
       <div className="p-6 rounded-lg shadow-md mb-8">
         <h2 className="text-2xl font-semibold text-gray-100 mb-4">Record Recycling</h2>
-        <Form method="post" className="space-y-4">
-          <input type="hidden" name="intent" value="recordRecycling" />
-          <div>
-            <label htmlFor="studentId" className="block text-sm font-medium text-gray-300">Select Student</label>
-            <select
-              id="studentId"
-              name="studentId"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            >
-              <option value="">Select a student</option>
-              {studentsList.map((student) => (
-                <option key={student.id} value={student.id}>
-                  {student.name} ({student.email}) - {student.classroom?.name}
-                </option>
-              ))}
-            </select>
-            {actionData?.errors?.studentId && (
-              <p className="text-red-500 text-xs mt-1">{actionData.errors.studentId[0]}</p>
-            )}
-          </div>
-
-
-
-          <div>
-            <label htmlFor="classroomId" className="block text-sm font-medium text-gray-300">Classroom</label>
-            <select
-              id="classroomId"
-              name="classroomId"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            >
-              <option value="">Select a classroom</option>
-              {allClassrooms.map((classroom) => (
-                <option key={classroom.id} value={classroom.id}>
-                  {classroom.name}
-                </option>
-              ))}
-            </select>
-            {actionData?.errors?.classroomId && (
-              <p className="text-red-500 text-xs mt-1">{actionData.errors.classroomId[0]}</p>
-            )}
-          </div>
-          <div>
-            <label htmlFor="item" className="block text-sm font-medium text-gray-300">Item</label>
-            <input
-              type="text"
-              id="item"
-              name="item"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            />
-            {actionData?.errors?.item && (
-              <p className="text-red-500 text-xs mt-1">{actionData.errors.item[0]}</p>
-            )}
-          </div>
-          <div>
-            <label htmlFor="weight" className="block text-sm font-medium text-gray-300">Weight (grams)</label>
-            <input
-              type="number"
-              id="weight"
-              name="weight"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            />
-            {actionData?.errors?.weight && (
-              <p className="text-red-500 text-xs mt-1">{actionData.errors.weight[0]}</p>
-            )}
-          </div>
-          {actionData?.errors?._global && (
-            <p className="text-red-500 text-xs mt-1">{actionData.errors._global[0]}</p>
-          )}
-          <button
-            type="submit"
-            name="intent"
-            value="recordRecycling"
-            className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            Record Recycling
-          </button>
-        </Form>
+        <RecyclingForm students={studentsList} classrooms={allClassrooms} errors={actionData?.errors} />
       </div>
 
       <div className="p-6 rounded-lg shadow-md">
@@ -192,7 +132,7 @@ export default function Recycling() {
             {allRecyclingRecords.map((record) => (
               <li key={record.id} className="py-3">
                 <p className="text-lg font-medium text-gray-200">{record.student?.name} ({record.student?.email}) - {record.item} ({record.weight}g)</p>
-                <p className="text-sm text-gray-500">Classroom: {record.classroom?.name} - Recycled At: {new Date(record?.recycledAt).toLocaleString()}</p>
+                <p className="text-sm text-gray-500">Classroom: {record.classroom?.name} - Recycled At: {record.recycledAt ? new Date(record.recycledAt).toLocaleString() : "Unknown"}</p>
               </li>
             ))}
           </ul>

@@ -6,6 +6,7 @@ import { db } from "~/db";
 import { students, classrooms } from "~/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
+import StudentForm from "../components/StudentForm";
 
 
 export const meta: MetaFunction = () => {
@@ -21,7 +22,16 @@ const CreateStudentSchema = z.object({
   classroomId: z.string().min(1, "Classroom is required"),
 });
 
-export async function action({ request }: ActionFunctionArgs) {
+interface ActionErrors {
+  errors: {
+    name?: string[];
+    email?: string[];
+    classroomId?: string[];
+    _global?: string[];
+  };
+}
+
+export async function action({ request }: ActionFunctionArgs): Promise<ActionErrors | Response> {
 
   const formData = await request.formData();
   const intent = formData.get("intent");
@@ -30,7 +40,7 @@ export async function action({ request }: ActionFunctionArgs) {
     const submission = CreateStudentSchema.safeParse(Object.fromEntries(formData));
 
     if (!submission.success) {
-      return ({ errors: submission.error.flatten().fieldErrors });
+      return { errors: submission.error.flatten().fieldErrors };
     }
 
     const { name, email, classroomId } = submission.data;
@@ -42,26 +52,26 @@ export async function action({ request }: ActionFunctionArgs) {
         classroomId: parseInt(classroomId),
       });
       return redirect("/students");
-    } catch (error: unknown) {
+    } catch (error: any) {
       if (error.code === "23505") {
-        return ({ errors: { email: ["Email already exists"] } });
+        return { errors: { email: ["Email already exists"] } };
       }
-      return ({ errors: { _global: ["Failed to create student"] } });
+      return { errors: { _global: ["Failed to create student"] } };
     }
   } else if (intent === "deleteStudent") {
     const studentId = formData.get("studentId");
     if (typeof studentId !== "string" || studentId.length === 0) {
-      return ({ errors: { _global: ["Student ID is required"] }});
+      return { errors: { _global: ["Student ID is required"] } };
     }
     try {
       await db.delete(students).where(eq(students.id, parseInt(studentId)));
       return redirect("/students");
     } catch (error) {
-      return ({ errors: { _global: ["Failed to delete student"] }  });
+      return { errors: { _global: ["Failed to delete student"] } };
     }
   }
 
-  return ({ errors: { _global: ["Invalid intent"] } });
+  return { errors: { _global: ["Invalid intent"] } };
 }
 
 
@@ -84,7 +94,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export default function Students() {
   const { user, allClassrooms, allStudents } = useLoaderData<typeof loader>();
-  const actionData = useActionData<typeof action>();
+  const actionData = useActionData<ActionErrors>();
 
   return (
     <div className="min-h-screen p-6">
@@ -95,61 +105,7 @@ export default function Students() {
 
       <div className="p-6 rounded-lg shadow-md mb-8">
         <h2 className="text-2xl font-semibold text-gray-200 mb-4">Create New Student</h2>
-        <Form method="post" className="space-y-4">
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            />
-            {actionData?.errors?.name && (
-              <p className="text-red-500 text-xs mt-1">{actionData.errors.name[0]}</p>
-            )}
-          </div>
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            />
-            {actionData?.errors?.email && (
-              <p className="text-red-500 text-xs mt-1">{actionData.errors.email[0]}</p>
-            )}
-          </div>
-          <div>
-            <label htmlFor="classroomId" className="block text-sm font-medium text-gray-700">Classroom</label>
-            <select
-              id="classroomId"
-              name="classroomId"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            >
-              <option value="">Select a classroom</option>
-              {allClassrooms.map((classroom) => (
-                <option key={classroom.id} value={classroom.id}>
-                  {classroom.name}
-                </option>
-              ))}
-            </select>
-            {actionData?.errors?.classroomId && (
-              <p className="text-red-500 text-xs mt-1">{actionData.errors.classroomId[0]}</p>
-            )}
-          </div>
-          {actionData?.errors?._global && (
-            <p className="text-red-500 text-xs mt-1">{actionData.errors._global[0]}</p>
-          )}
-          <button
-            type="submit"
-            name="intent"
-            value="createStudent"
-            className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            Add Student
-          </button>
-        </Form>
+        <StudentForm classrooms={allClassrooms} errors={actionData?.errors} />
       </div>
 
       <div className=" p-6 rounded-lg shadow-md">
