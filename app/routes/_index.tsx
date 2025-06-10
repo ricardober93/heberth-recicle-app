@@ -19,7 +19,7 @@ export async function loader() {
     (await db
       .select({
         studentId: recycling.studentId,
-        studentName: students.name,
+        studentName: sql<string | null>`students.name`,
         totalWeight: sum(recycling.weight),
       })
       .from(recycling)
