@@ -2,7 +2,7 @@ import type { MetaFunction } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { db } from "~/db";
 import { students, recycling, classrooms } from "~/db/schema";
-import { eq, sum, desc, sql } from "drizzle-orm";
+import { eq, sum, desc } from "drizzle-orm";
 
 export const meta: MetaFunction = () => {
   return [
@@ -17,11 +17,7 @@ export const meta: MetaFunction = () => {
 export async function loader() {
   const topStudents =
     (await db
-      .select({
-        studentId: recycling.studentId,
-        studentName: sql<string | null>`students.name`,
-        totalWeight: sum(recycling.weight),
-      })
+      .select()
       .from(recycling)
       .leftJoin(students, eq(recycling.studentId, students.id))
       .groupBy(recycling.studentId, students.name)
@@ -108,15 +104,15 @@ export default function Index() {
           <ul className="divide-y divide-gray-200">
             {topStudents.map((student, index) => (
               <li
-                key={student.studentId}
+                key={student.students?.id}
                 className="py-3 flex items-center justify-between bg-gray-600  rounded-lg shadow-md p-4"
               >
                 <div>
                   <p className="text-lg font-medium text-gray-300">
-                    {index + 1}. {student.studentName}
+                    {index + 1}. {student.students?.name}
                   </p>
                   <p className="text-sm text-gray-100">
-                    Total Recycled: {student.totalWeight}g
+                    Total Recycled: {student.recycling.weight}g
                   </p>
                 </div>
               </li>
