@@ -1,8 +1,8 @@
 'use client';
 
+import Button from '@/components/Button';
+import Card from '@/components/Card';
 import { useState } from 'react';
-import { Card } from '../../../components/Card';
-import { Button } from '../../../components/Button';
 
 export default function InitPage() {
   const [isInitializing, setIsInitializing] = useState(false);
