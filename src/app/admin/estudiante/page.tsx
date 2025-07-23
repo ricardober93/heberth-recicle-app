@@ -53,7 +53,7 @@ export default function EstudiantePage() {
       setSalones(salonesData);
     } catch (error) {
       console.error('Error:', error);
-      setError({ ...error, nombre: 'Error al cargar los datos' });
+      setError({ nombre: 'Error al cargar los datos', apellido: '', salonId: '' });
     } finally {
       setLoading(false);
     }
@@ -119,7 +119,7 @@ export default function EstudiantePage() {
       setEditingId(null);
     } catch (error) {
       console.error('Error:', error);
-      setError({ ...error, nombre: 'Error al guardar el estudiante' });
+      setError({ nombre: 'Error al guardar el estudiante', apellido: '', salonId: '' });
     } finally {
       setLoading(false);
     }
@@ -163,7 +163,7 @@ export default function EstudiantePage() {
       await fetchData();
     } catch (error) {
       console.error('Error:', error);
-      setError({ ...error, nombre: 'Error al eliminar el estudiante' });
+      setError({ nombre: 'Error al eliminar el estudiante', apellido: '', salonId: '' });
     } finally {
       setLoading(false);
     }

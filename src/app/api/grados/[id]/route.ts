@@ -3,18 +3,19 @@ import { getGradoById, updateGrado, deleteGrado } from '../../../../models/grado
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params:  Promise<{ id: string }>  }
 ) {
   try {
-    const id = parseInt(params.id);
-    if (isNaN(id)) {
+     const { id } = await params;
+    const idNumber = parseInt(id);
+    if (isNaN(idNumber)) {
       return NextResponse.json(
         { error: 'ID inválido' },
         { status: 400 }
       );
     }
 
-    const grado = await getGradoById(id);
+    const grado = await getGradoById(idNumber);
     if (!grado) {
       return NextResponse.json(
         { error: 'Grado no encontrado' },
@@ -34,11 +35,12 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params:  Promise<{ id: string }>  }
 ) {
   try {
-    const id = parseInt(params.id);
-    if (isNaN(id)) {
+    const { id } = await params;
+    const idNumber = parseInt(id);
+    if (isNaN(idNumber)) {
       return NextResponse.json(
         { error: 'ID inválido' },
         { status: 400 }
@@ -55,7 +57,7 @@ export async function PUT(
       );
     }
 
-    const gradoActualizado = await updateGrado(id, { nombre: nombre.trim() });
+    const gradoActualizado = await updateGrado(idNumber, { nombre: nombre.trim() });
     if (!gradoActualizado || gradoActualizado.length === 0) {
       return NextResponse.json(
         { error: 'Grado no encontrado' },
@@ -75,18 +77,19 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params:  Promise<{ id: string }>  }
 ) {
   try {
-    const id = parseInt(params.id);
-    if (isNaN(id)) {
+    const { id } = await params;
+    const idNumber = parseInt(id);
+    if (isNaN(idNumber)) {  
       return NextResponse.json(
         { error: 'ID inválido' },
         { status: 400 }
       );
     }
 
-    const gradoEliminado = await deleteGrado(id);
+    const gradoEliminado = await deleteGrado(idNumber);
     if (!gradoEliminado || gradoEliminado.length === 0) {
       return NextResponse.json(
         { error: 'Grado no encontrado' },

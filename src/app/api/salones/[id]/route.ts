@@ -3,18 +3,19 @@ import { getSalonById, updateSalon, deleteSalon } from '../../../../models/salon
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params:  Promise<{ id: string }>  }
 ) {
   try {
-    const id = parseInt(params.id);
-    if (isNaN(id)) {
+    const { id } = await params;
+    const idNumber = parseInt(id);
+    if (isNaN(idNumber)) {
       return NextResponse.json(
         { error: 'ID inválido' },
         { status: 400 }
       );
     }
 
-    const salon = await getSalonById(id);
+    const salon = await getSalonById(idNumber);
     if (!salon) {
       return NextResponse.json(
         { error: 'Salón no encontrado' },
@@ -34,11 +35,12 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params:  Promise<{ id: string }>  }
 ) {
   try {
-    const id = parseInt(params.id);
-    if (isNaN(id)) {
+    const { id } = await params;
+    const idNumber = parseInt(id);
+    if (isNaN(idNumber)) {
       return NextResponse.json(
         { error: 'ID inválido' },
         { status: 400 }
@@ -62,7 +64,7 @@ export async function PUT(
       );
     }
 
-    const salonActualizado = await updateSalon(id, { 
+    const salonActualizado = await updateSalon(idNumber, { 
       nombre: nombre.trim(), 
       gradoId: parseInt(gradoId) 
     });
@@ -85,18 +87,19 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params:  Promise<{ id: string }>  }
 ) {
   try {
-    const id = parseInt(params.id);
-    if (isNaN(id)) {
+    const { id } = await params;
+    const idNumber = parseInt(id);
+    if (isNaN(idNumber)) {
       return NextResponse.json(
         { error: 'ID inválido' },
         { status: 400 }
       );
     }
 
-    const salonEliminado = await deleteSalon(id);
+    const salonEliminado = await deleteSalon(idNumber);
     if (!salonEliminado || salonEliminado.length === 0) {
       return NextResponse.json(
         { error: 'Salón no encontrado' },
