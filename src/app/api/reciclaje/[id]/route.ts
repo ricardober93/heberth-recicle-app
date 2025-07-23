@@ -3,18 +3,19 @@ import { getReciclajeById, updateReciclaje, deleteReciclaje } from '../../../../
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
-    if (isNaN(id)) {
+    const {id } = await params;
+    const idNumber = parseInt(id);
+    if (isNaN(idNumber)) {
       return NextResponse.json(
         { error: 'ID inválido' },
         { status: 400 }
       );
     }
 
-    const reciclaje = await getReciclajeById(id);
+    const reciclaje = await getReciclajeById(idNumber);
     if (!reciclaje) {
       return NextResponse.json(
         { error: 'Reciclaje no encontrado' },
@@ -34,11 +35,12 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
-    if (isNaN(id)) {
+    const {id } = await params;
+    const idNumber = parseInt(id);
+    if (isNaN(idNumber)) {
       return NextResponse.json(
         { error: 'ID inválido' },
         { status: 400 }
@@ -63,7 +65,7 @@ export async function PUT(
       );
     }
 
-    const reciclajeActualizado = await updateReciclaje(id, {
+    const reciclajeActualizado = await updateReciclaje(idNumber, {
       cantidad: parseFloat(cantidad),
       estudianteId: parseInt(estudianteId),
       fecha: fecha ? new Date(fecha) : new Date()
@@ -88,18 +90,19 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
-    if (isNaN(id)) {
+    const {id } = await params;
+    const idNumber = parseInt(id);
+    if (isNaN(idNumber)) {
       return NextResponse.json(
         { error: 'ID inválido' },
         { status: 400 }
       );
     }
 
-    const reciclajeEliminado = await deleteReciclaje(id);
+    const reciclajeEliminado = await deleteReciclaje(idNumber);
     if (!reciclajeEliminado || reciclajeEliminado.length === 0) {
       return NextResponse.json(
         { error: 'Reciclaje no encontrado' },
