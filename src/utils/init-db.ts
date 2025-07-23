@@ -90,22 +90,41 @@ async function insertSampleData() {
     ]).returning();
     
     // Insertar estudiantes
+    // Insert students with error handling and validation
     const estudiantesInsertados = await db.insert(estudiantes).values([
       { nombre: 'Ana', apellido: 'García', salonId: salonesInsertados[0].id },
       { nombre: 'Carlos', apellido: 'López', salonId: salonesInsertados[0].id },
       { nombre: 'María', apellido: 'Rodríguez', salonId: salonesInsertados[1].id },
       { nombre: 'José', apellido: 'Martínez', salonId: salonesInsertados[1].id },
       { nombre: 'Laura', apellido: 'Sánchez', salonId: salonesInsertados[2].id }
-    ]).returning();
+    ]).returning({
+      id: estudiantes.id,
+      nombre: estudiantes.nombre,
+      apellido: estudiantes.apellido,
+      salonId: estudiantes.salonId
+    });
+
+    if (!estudiantesInsertados || estudiantesInsertados.length === 0) {
+      throw new Error('Failed to insert students data');
+    }
     
     // Insertar reciclajes
-    await db.insert(reciclajes).values([
-      { estudianteId: estudiantesInsertados[0].id, cantidad: 2.5, tipoMaterial: 'Plástico', fecha: new Date() },
-      { estudianteId: estudiantesInsertados[1].id, cantidad: 1.8, tipoMaterial: 'Papel', fecha: new Date() },
-      { estudianteId: estudiantesInsertados[2].id, cantidad: 3.2, tipoMaterial: 'Vidrio', fecha: new Date() },
-      { estudianteId: estudiantesInsertados[3].id, cantidad: 1.5, tipoMaterial: 'Metal', fecha: new Date() },
-      { estudianteId: estudiantesInsertados[4].id, cantidad: 2.1, tipoMaterial: 'Plástico', fecha: new Date() }
-    ]);
+    const reciclajesInsertados = await db.insert(reciclajes).values([
+      { estudianteId: estudiantesInsertados[0].id, cantidad: 2.5, fecha: new Date() },  
+      { estudianteId: estudiantesInsertados[1].id, cantidad: 1.8, fecha: new Date() },
+      { estudianteId: estudiantesInsertados[2].id, cantidad: 3.2, fecha: new Date() },
+      { estudianteId: estudiantesInsertados[3].id, cantidad: 1.5, fecha: new Date() },
+      { estudianteId: estudiantesInsertados[4].id, cantidad: 2.1, fecha: new Date() }
+    ]).returning({
+      id: reciclajes.id,
+      estudianteId: reciclajes.estudianteId,
+      cantidad: reciclajes.cantidad,
+      fecha: reciclajes.fecha
+    });
+
+    if (!reciclajesInsertados || reciclajesInsertados.length === 0) {
+      throw new Error('Failed to insert recycling data');
+    }
     
     console.log('Datos de ejemplo insertados correctamente');
   } catch (error) {
