@@ -3,18 +3,19 @@ import { getEstudianteById, updateEstudiante, deleteEstudiante } from '../../../
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params:  Promise<{ id: string }>  }
 ) {
   try {
-    const id = parseInt(params.id);
-    if (isNaN(id)) {
+     const { id } = await params;
+    const idNumber = parseInt(id);
+    if (isNaN(idNumber)) {
       return NextResponse.json(
         { error: 'ID inválido' },
         { status: 400 }
       );
     }
 
-    const estudiante = await getEstudianteById(id);
+    const estudiante = await getEstudianteById(idNumber); 
     if (!estudiante) {
       return NextResponse.json(
         { error: 'Estudiante no encontrado' },
@@ -34,11 +35,12 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params:  Promise<{ id: string }>  }
 ) {
   try {
-    const id = parseInt(params.id);
-    if (isNaN(id)) {
+    const { id } = await params;
+    const idNumber = parseInt(id);
+    if (isNaN(idNumber)) {  
       return NextResponse.json(
         { error: 'ID inválido' },
         { status: 400 }
@@ -69,7 +71,7 @@ export async function PUT(
       );
     }
 
-    const estudianteActualizado = await updateEstudiante(id, { 
+    const estudianteActualizado = await updateEstudiante(idNumber, { 
       nombre: nombre.trim(), 
       apellido: apellido.trim(),
       salonId: parseInt(salonId) 
@@ -93,18 +95,19 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params:  Promise<{ id: string }>  }
 ) {
   try {
-    const id = parseInt(params.id);
-    if (isNaN(id)) {
+    const { id } = await params;
+    const idNumber = parseInt(id);
+    if (isNaN(idNumber)) {
       return NextResponse.json(
         { error: 'ID inválido' },
         { status: 400 }
       );
     }
 
-    const estudianteEliminado = await deleteEstudiante(id);
+    const estudianteEliminado = await deleteEstudiante(idNumber);
     if (!estudianteEliminado || estudianteEliminado.length === 0) {
       return NextResponse.json(
         { error: 'Estudiante no encontrado' },
