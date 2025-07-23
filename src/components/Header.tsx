@@ -11,6 +11,7 @@ const Header = () => {
     { name: 'Grados', path: '/admin/grado' },
     { name: 'Salones', path: '/admin/salon' },
     { name: 'Estudiantes', path: '/admin/estudiante' },
+    { name: 'Reciclaje', path: '/admin/reciclaje' },
   ];
 
   return (

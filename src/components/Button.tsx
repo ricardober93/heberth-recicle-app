@@ -30,7 +30,7 @@ const Button = ({
     lg: 'px-6 py-3 text-lg',
   };
   
-  const disabledClasses = props.disabled ? 'opacity-50 cursor-not-allowed' : '';
+  const disabledClasses = props.disabled ? 'opacity-70 cursor-not-allowed' : '';
   
   return (
     <button

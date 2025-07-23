@@ -29,11 +29,14 @@ export async function getAllEstudiantes() {
       apellido: estudiantes.apellido,
       salonId: estudiantes.salonId,
       salonNombre: salones.nombre,
+      totalReciclaje: sql<number>`COALESCE(SUM(${reciclajes.cantidad}), 0)`,
       createdAt: estudiantes.createdAt,
-      updatedAt: estudiantes.updatedAt
+      updatedAt: estudiantes.updatedAt,
     })
     .from(estudiantes)
-    .leftJoin(salones, eq(estudiantes.salonId, salones.id));
+    .leftJoin(salones, eq(estudiantes.salonId, salones.id))
+    .leftJoin(reciclajes, eq(estudiantes.id, reciclajes.estudianteId))
+    .groupBy(estudiantes.id, salones.nombre, estudiantes.createdAt, estudiantes.updatedAt);
 }
 
 export async function getEstudianteById(id: number) {
