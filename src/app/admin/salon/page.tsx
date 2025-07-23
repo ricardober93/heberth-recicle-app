@@ -46,7 +46,7 @@ export default function SalonPage() {
       setGrados(gradosData);
     } catch (error) {
       console.error('Error:', error);
-      setError({ ...error, nombre: 'Error al cargar los datos' });
+      setError({ nombre: 'Error al cargar los datos', gradoId: '' });
     } finally {
       setLoading(false);
     }
@@ -110,7 +110,7 @@ export default function SalonPage() {
       setEditingId(null);
     } catch (error) {
       console.error('Error:', error);
-      setError({ ...error, nombre: 'Error al guardar el salón' });
+      setError({ nombre: 'Error al guardar el salón', gradoId: '' });
     } finally {
       setLoading(false);
     }
@@ -148,7 +148,7 @@ export default function SalonPage() {
       await fetchData();
     } catch (error) {
       console.error('Error:', error);
-      setError({ ...error, nombre: 'Error al eliminar el salón' });
+      setError({ nombre: 'Error al eliminar el salón', gradoId: '' });
     } finally {
       setLoading(false);
     }
