@@ -1,0 +1,17 @@
+🔍 Verificando configuración de admin...
+📅 Fecha: 7/25/2025, 10:31:17 AM
+
+📊 Total de usuarios en la base de datos: 2
+
+👥 USUARIOS ENCONTRADOS:
+1. 👤 user@reciclaje.com (user)
+2. 👑 admin@reciclaje.com (admin)
+
+✅ CONFIGURACIÓN CORRECTA: 1 usuario(s) admin encontrado(s)
+
+👑 ADMINISTRADORES:
+   • admin@reciclaje.com
+
+🎉 El sistema está listo. Puedes acceder a /admin con cualquiera de estos usuarios.
+
+📄 Este log se ha guardado en: admin-setup.log
