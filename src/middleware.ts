@@ -55,7 +55,7 @@ export async function middleware(request: NextRequest) {
           console.log('⚠️ Session API returned non-OK status:', sessionResponse.status);
         }
       } catch (apiError ) {
-        console.log('⚠️ Session API call failed, will try direct DB verification:', apiError?.message as string || 'Unknown error');
+        console.log('⚠️ Session API call failed, will try direct DB verification:', apiError instanceof Error ? apiError.message : 'Unknown error');
       }
       
       // If API verification failed, try direct database verification
