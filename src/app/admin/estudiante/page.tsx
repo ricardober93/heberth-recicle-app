@@ -6,6 +6,7 @@ import Button from '../../../components/Button';
 import Input from '../../../components/Input';
 import Select from '../../../components/Select';
 import Table from '../../../components/Table';
+import { AdminPageGuard } from '@/utils/auth';
 
 interface Salon {
   id: number;
@@ -22,7 +23,7 @@ interface Estudiante {
   totalReciclaje?: number;
 }
 
-export default function EstudiantePage() {
+function EstudiantePageContent() {
   const [estudiantes, setEstudiantes] = useState<Estudiante[]>([]);
   const [salones, setSalones] = useState<Salon[]>([]);
   const [loading, setLoading] = useState(true);
@@ -278,5 +279,13 @@ export default function EstudiantePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function EstudiantePage() {
+  return (
+    <AdminPageGuard>
+      <EstudiantePageContent />
+    </AdminPageGuard>
   );
 }

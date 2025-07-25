@@ -6,6 +6,7 @@ import Button from '../../../components/Button';
 import Input from '../../../components/Input';
 import Select from '../../../components/Select';
 import Table from '../../../components/Table';
+import { AdminPageGuard } from '@/utils/auth';
 
 interface Grado {
   id: number;
@@ -19,7 +20,7 @@ interface Salon {
   gradoNombre?: string;
 }
 
-export default function SalonPage() {
+function SalonPageContent() {
   const [salones, setSalones] = useState<Salon[]>([]);
   const [grados, setGrados] = useState<Grado[]>([]);
   const [loading, setLoading] = useState(true);
@@ -246,5 +247,13 @@ export default function SalonPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SalonPage() {
+  return (
+    <AdminPageGuard>
+      <SalonPageContent />
+    </AdminPageGuard>
   );
 }

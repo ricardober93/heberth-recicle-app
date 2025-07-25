@@ -6,6 +6,7 @@ import Button from '@/components/Button';
 import Input from '@/components/Input';
 import Select from '@/components/Select';
 import Table from '@/components/Table';
+import { AdminPageGuard } from '@/utils/auth';
 
 interface Estudiante {
   id: number;
@@ -25,7 +26,7 @@ interface Reciclaje {
   createdAt: string;
 }
 
-export default function ReciclajePage() {
+function ReciclajePageContent() {
   const [reciclajes, setReciclajes] = useState<Reciclaje[]>([]);
   const [estudiantes, setEstudiantes] = useState<Estudiante[]>([]);
   const [loading, setLoading] = useState(true);
@@ -314,5 +315,13 @@ export default function ReciclajePage() {
         )}
       </Card>
     </div>
+  );
+}
+
+export default function ReciclajePage() {
+  return (
+    <AdminPageGuard>
+      <ReciclajePageContent />
+    </AdminPageGuard>
   );
 }

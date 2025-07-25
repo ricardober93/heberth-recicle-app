@@ -5,13 +5,14 @@ import Card from '../../../components/Card';
 import Button from '../../../components/Button';
 import Input from '../../../components/Input';
 import Table from '../../../components/Table';
+import { AdminPageGuard } from '@/utils/auth';
 
 interface Grado {
   id: number;
   nombre: string;
 }
 
-export default function GradoPage() {
+function GradoPageContent() {
   const [grados, setGrados] = useState<Grado[]>([]);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({ nombre: '' });
@@ -193,5 +194,13 @@ export default function GradoPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function GradoPage() {
+  return (
+    <AdminPageGuard>
+      <GradoPageContent />
+    </AdminPageGuard>
   );
 }
