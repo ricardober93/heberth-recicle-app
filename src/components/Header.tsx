@@ -3,13 +3,11 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession, signOut } from '@/lib/auth-client';
-import { useUserRole } from '@/hooks/useUserRole';
 import Button from './Button';
 
 const Header = () => {
   const pathname = usePathname();
   const { data: session, isPending } = useSession();
-  const { userRole, isLoading: roleLoading } = useUserRole();
 
   const publicNavItems = [
     { name: 'Inicio', path: '/' },
@@ -23,7 +21,7 @@ const Header = () => {
     { name: 'Reciclaje', path: '/admin/reciclaje' },
   ];
 
-  const navItems = userRole === 'admin' ? adminNavItems : publicNavItems;
+  const navItems = session?.user?.role === 'admin' ? adminNavItems : publicNavItems;
 
 
   const handleSignOut = async () => {
@@ -58,7 +56,7 @@ const Header = () => {
                 <div className="flex items-center space-x-4">
                   <div className="text-sm">
                     <span className="font-medium">{session.user.name}</span>
-                    {userRole === 'admin' && (
+                    {session.user.role === 'admin' && (
                       <span className="ml-2 px-2 py-1 bg-green-500 text-xs rounded-full">
                         Admin
                       </span>

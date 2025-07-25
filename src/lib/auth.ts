@@ -1,15 +1,14 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { customSession } from "better-auth/plugins";
-import { adminClient } from "better-auth/client/plugins"
+import { admin } from "better-auth/plugins";
 import { db } from "../utils/db";
-import { user as userSchema, session, account, verification } from "../models/schema";
+import { user, session, account, verification } from "../models/schema";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: {
-      userSchema,
+      user,
       session,
       account,
       verification,
@@ -26,14 +25,9 @@ export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET!,
   baseURL: process.env.BETTER_AUTH_URL!,
   plugins: [
-    customSession(async ({ user, session }) => {
-      return {
-        user: {
-          ...user,
-          role: user.role, // Expose user role directly
-        },
-        session,
-      };
+    admin({
+      defaultRole: "user",
+      adminRoles: ["admin"],
     }),
   ],
 });

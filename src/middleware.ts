@@ -1,7 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from './utils/db';
-import { user } from './models/schema';
-import { eq } from 'drizzle-orm';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -34,25 +31,8 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL('/auth/signin', request.url));
       }
 
-      // Query database directly for user role as fallback
-      let userRole = session.user.role;
-      
-      if (!userRole && session.user.id) {
-        try {
-          const dbUser = await db.select({ role: user.role })
-            .from(user)
-            .where(eq(user.id, session.user.id))
-            .limit(1);
-          
-          userRole = dbUser[0]?.role || 'user';
-        } catch (dbError) {
-          console.error('Database query error:', dbError);
-          userRole = 'user'; // Default to user role
-        }
-      }
-
-      // Check if user has admin role
-      if (userRole !== 'admin') {
+      // Check if user has admin role (now handled by Better Auth admin plugin)
+      if (session.user.role !== 'admin') {
         return NextResponse.redirect(new URL('/unauthorized', request.url));
       }
     } catch (error) {
